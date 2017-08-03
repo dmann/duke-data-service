@@ -2,10 +2,10 @@ require 'rails_helper'
 
 RSpec.describe DataFile, type: :model do
   subject { child_file }
-  let(:root_file) { FactoryGirl.create(:data_file, :root) }
-  let(:child_file) { FactoryGirl.create(:data_file, :with_parent) }
-  let(:invalid_file) { FactoryGirl.create(:data_file, :invalid) }
-  let(:deleted_file) { FactoryGirl.create(:data_file, :deleted) }
+  let(:root_file) { FactoryGirl.build_stubbed(:data_file, :root) }
+  let(:child_file) { FactoryGirl.build_stubbed(:data_file, :with_parent) }
+  let(:invalid_file) { FactoryGirl.build_stubbed(:data_file, :invalid) }
+  let(:deleted_file) { FactoryGirl.build_stubbed(:data_file, :deleted) }
   let(:project) { subject.project }
   let(:other_project) { FactoryGirl.create(:project) }
   let(:other_folder) { FactoryGirl.create(:folder, project: other_project) }
@@ -18,7 +18,13 @@ RSpec.describe DataFile, type: :model do
     let(:serialized_kind) { true }
   end
   it_behaves_like 'a logically deleted model'
-  it_behaves_like 'a job_transactionable model'
+
+  shared_context 'with created subject', include_created_subject: true do
+    subject { FactoryGirl.create(:data_file, :with_parent) }
+  end
+  it_behaves_like 'a job_transactionable model' do
+    include_context 'with created subject'
+  end
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
@@ -30,15 +36,15 @@ RSpec.describe DataFile, type: :model do
   end
 
   describe 'validations' do
-    let(:completed_upload) { FactoryGirl.create(:upload, :completed, :with_fingerprint, project: subject.project) }
-    let(:incomplete_upload) { FactoryGirl.create(:upload, project: subject.project) }
-    let(:upload_with_error) { FactoryGirl.create(:upload, :with_error, project: subject.project) }
+    let(:completed_upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint, project: subject.project) }
+    let(:incomplete_upload) { FactoryGirl.build_stubbed(:upload, project: subject.project) }
+    let(:upload_with_error) { FactoryGirl.build_stubbed(:upload, :with_error, project: subject.project) }
 
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:upload) }
 
-    it 'should not allow project_id to be changed' do
+    it 'should not allow project_id to be changed', :include_created_subject do
       should allow_value(project).for(:project)
       expect(subject).to be_valid
       should allow_value(project.id).for(:project_id)
@@ -80,7 +86,7 @@ RSpec.describe DataFile, type: :model do
     end
   end
 
-  describe '.parent=' do
+  describe '.parent=', :include_created_subject do
     it 'should set project to parent.project' do
       expect(subject.parent).not_to eq other_folder
       expect(subject.project).not_to eq other_folder.project
@@ -92,7 +98,7 @@ RSpec.describe DataFile, type: :model do
     end
   end
 
-  describe '.parent_id=' do
+  describe '.parent_id=', :include_created_subject do
     it 'should set project to parent.project' do
       expect(subject.parent).not_to eq other_folder
       expect(subject.project).not_to eq other_folder.project
@@ -109,14 +115,14 @@ RSpec.describe DataFile, type: :model do
     it { should delegate_method(:host).to(:upload).as(:url_root) }
     it { should delegate_method(:url).to(:upload).as(:temporary_url) }
 
-    describe '#url' do
+    describe '#url', :include_created_subject do
       it { expect(subject.url).to include uri_encoded_name }
     end
 
     describe '#upload' do
       subject { FactoryGirl.build(:data_file, without_upload: true) }
       let(:completed_upload) { FactoryGirl.create(:upload, :completed, :with_fingerprint, project: subject.project) }
-      let(:different_upload) { FactoryGirl.create(:upload, :completed, :with_fingerprint, project: subject.project) }
+      let(:different_upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint, project: subject.project) }
 
       context 'before save' do
         it { expect(subject.upload).to be_nil }
@@ -213,7 +219,7 @@ RSpec.describe DataFile, type: :model do
       end
     end
 
-    describe '#current_file_version' do
+    describe '#current_file_version', :include_created_subject do
       it { is_expected.to respond_to(:current_file_version) }
       it { expect(subject.current_file_version).to be_persisted }
       it { expect(subject.current_file_version).to eq subject.current_file_version }
@@ -244,7 +250,7 @@ RSpec.describe DataFile, type: :model do
       end
     end
 
-    describe '#set_current_file_version_attributes' do
+    describe '#set_current_file_version_attributes', :include_created_subject do
       let(:latest_version) { subject.current_file_version }
       it { is_expected.to respond_to(:set_current_file_version_attributes) }
       it { expect(subject.set_current_file_version_attributes).to be_a FileVersion }
@@ -273,7 +279,7 @@ RSpec.describe DataFile, type: :model do
 
     context 'with nil current_file_version' do
       subject {
-        df = FactoryGirl.create(:data_file)
+        df = FactoryGirl.build_stubbed(:data_file)
         df.file_versions.destroy_all
         df
       }
@@ -336,6 +342,7 @@ RSpec.describe DataFile, type: :model do
     include_context 'with job runner', ElasticsearchIndexJob
 
     it_behaves_like 'an Elasticsearch::Model' do
+      include_context 'with created subject'
       context 'when ElasticsearchIndexJob::perform_later raises an error' do
         context 'with new data_file' do
           subject { FactoryGirl.build(:data_file, :root) }
@@ -347,7 +354,7 @@ RSpec.describe DataFile, type: :model do
           }.not_to change{described_class.count} }
         end
         context 'with existing data_file' do
-          subject { root_file }
+          subject { FactoryGirl.create(:data_file, :root) }
           before(:each) do
             is_expected.to be_persisted
             subject.name += 'x'
