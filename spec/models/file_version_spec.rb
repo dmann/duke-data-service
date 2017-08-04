@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe FileVersion, type: :model do
   subject { file_version }
-  let(:file_version) { FactoryGirl.create(:file_version) }
-  let(:data_file) { file_version.data_file }
+  let(:file_version) { FactoryGirl.create(:file_version, data_file: data_file) }
+  let(:data_file) { FactoryGirl.create(:data_file) }
   let(:deleted_file_version) { FactoryGirl.create(:file_version, :deleted) }
   let(:uri_encoded_name) { URI.encode(subject.data_file.name) }
   let(:upload) { file_version.upload }
@@ -117,7 +117,10 @@ RSpec.describe FileVersion, type: :model do
 
       context 'when not current_file_version' do
         subject { data_file.file_versions.first }
-        before { data_file.reload }
+        before(:each) do
+          expect(file_version).to be_persisted
+          expect(data_file.reload).to be_truthy
+        end
         it { is_expected.not_to eq data_file.current_file_version }
         it { expect(subject.deletion_allowed?).to be_truthy }
       end
