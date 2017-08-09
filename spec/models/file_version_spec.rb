@@ -2,18 +2,16 @@ require 'rails_helper'
 
 RSpec.describe FileVersion, type: :model do
   subject { file_version }
-  let(:file_version) { FactoryGirl.build_stubbed(:file_version, data_file: data_file, upload: upload) }
+  let(:file_version) { FactoryGirl.build_stubbed(:file_version, data_file: data_file) }
   let(:data_file) { FactoryGirl.build_stubbed(:data_file) }
   let(:deleted_file_version) { FactoryGirl.build_stubbed(:file_version, :deleted) }
   let(:uri_encoded_name) { URI.encode(subject.data_file.name) }
-  let(:upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint) }
   let(:other_upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint) }
 
   shared_context 'with created file_version', include_created_file_version: true do
     subject { file_version }
-    let(:file_version)  { FactoryGirl.create(:file_version, data_file: data_file, upload: upload) }
+    let(:file_version)  { FactoryGirl.create(:file_version, data_file: data_file) }
     let(:data_file) { FactoryGirl.create(:data_file) }
-    let(:upload) { FactoryGirl.create(:upload, :completed, :with_fingerprint) }
   end
 
   it_behaves_like 'an audited model'
@@ -55,11 +53,12 @@ RSpec.describe FileVersion, type: :model do
     end
 
     it 'should not allow upload_id to be changed', :include_created_file_version do
-      should allow_value(upload).for(:upload)
+      original_upload = subject.upload
+      should allow_value(original_upload).for(:upload)
       expect(subject).to be_valid
-      should allow_value(upload.id).for(:upload_id)
+      should allow_value(original_upload.id).for(:upload_id)
       should_not allow_value(other_upload.id).for(:upload_id)
-      should allow_value(upload.id).for(:upload_id)
+      should allow_value(original_upload.id).for(:upload_id)
       expect(subject).to be_valid
       should allow_value(other_upload).for(:upload)
       expect(subject).not_to be_valid
