@@ -51,7 +51,7 @@ shared_examples 'a ProvRelation' do
     it { is_expected.to validate_presence_of :creator_id }
     it { is_expected.to validate_presence_of :relatable_from }
     it { is_expected.to validate_presence_of :relatable_to }
-    it 'should be unique to all but deleted ProvRelations' do
+    it 'should be unique to all but deleted ProvRelations', :subject_created do
       expect(deleted_copy).to be_valid
       expect(deleted_copy.save).to be true
       is_expected.to be_persisted

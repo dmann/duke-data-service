@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe DerivedFromFileVersionProvRelation, type: :model do
-  subject { FactoryGirl.create(:derived_from_file_version_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:derived_from_file_version_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:derived_from_file_version_prov_relation)
+    end
+  end
   let(:resource_serializer) { DerivedFromFileVersionProvRelationSerializer }
   let(:expected_relationship_type) { 'was-derived-from' }
 

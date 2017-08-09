@@ -96,11 +96,11 @@ shared_examples 'a graphed relation' do |auto_create: false|
   it { is_expected.to callback(:manage_graph_relation).around(:update) }
 
   if auto_create
-    it 'should auto_create' do
+    it 'should auto_create', :subject_created do
       expect(subject).to be
       expect(graphed_relation).to be
     end
-    it 'should return the graphed relation of rel_type between from_model.graph_node and to_model.graph_node' do
+    it 'should return the graphed relation of rel_type between from_model.graph_node and to_model.graph_node', :subject_created do
       expect(subject).to be
       expect(from_node.query_as(:from).match("(from)-[r:#{rel_type}]->(to)").where('to.model_id = {m_id}').params(m_id: to_model.id).pluck(:r).count).to eq(1)
       expect(subject.graph_relation).to be
@@ -133,7 +133,7 @@ shared_examples 'a graphed relation' do |auto_create: false|
     end
   end
 
-  context 'when model is deleted' do
+  context 'when model is deleted', :subject_created do
     before do
       expect(subject).to be
       if auto_create
