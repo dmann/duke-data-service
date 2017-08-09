@@ -9,7 +9,7 @@ RSpec.describe FileVersion, type: :model do
   let(:upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint) }
   let(:other_upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint) }
 
-  shared_context 'with created subject', include_created_subject: true do
+  shared_context 'with created file_version', include_created_file_version: true do
     subject { file_version }
     let(:file_version)  { FactoryGirl.create(:file_version, data_file: data_file, upload: upload) }
     let(:data_file) { FactoryGirl.create(:data_file) }
@@ -25,7 +25,7 @@ RSpec.describe FileVersion, type: :model do
 
   it_behaves_like 'a logically deleted model'
   it_behaves_like 'a graphed node', auto_create: true, logically_deleted: true do
-    include_context 'with created subject'
+    include_context 'with created file_version'
   end
 
   describe 'associations' do
@@ -54,7 +54,7 @@ RSpec.describe FileVersion, type: :model do
       it { is_expected.not_to validate_presence_of(:upload_id) }
     end
 
-    it 'should not allow upload_id to be changed', :include_created_subject do
+    it 'should not allow upload_id to be changed', :include_created_file_version do
       should allow_value(upload).for(:upload)
       expect(subject).to be_valid
       should allow_value(upload.id).for(:upload_id)
@@ -65,7 +65,7 @@ RSpec.describe FileVersion, type: :model do
       expect(subject).not_to be_valid
     end
 
-    context 'when duplicating current_version', :include_created_subject do
+    context 'when duplicating current_version', :include_created_file_version do
       before { expect(data_file.reload).to be_truthy }
       subject { data_file.current_file_version.dup }
       it { is_expected.not_to be_valid }
@@ -121,7 +121,7 @@ RSpec.describe FileVersion, type: :model do
       end
     end
 
-    describe '#deletion_allowed?', :include_created_subject do
+    describe '#deletion_allowed?', :include_created_file_version do
       it { is_expected.to respond_to(:deletion_allowed?) }
 
       context 'when not current_file_version' do
