@@ -98,14 +98,14 @@ shared_examples 'an Elasticsearch::Model' do |resource_search_serializer_sym: :s
     it {
       is_expected.to callback(:create_elasticsearch_index).after(:create)
     }
-    it {
+    it 'enqueues a job', :subject_created do
       expect(ElasticsearchIndexJob).to receive(:initialize_job).with(
         subject
       ).and_return(job_transaction)
       expect {
         subject.create_elasticsearch_index
       }.to have_enqueued_job(ElasticsearchIndexJob).with(job_transaction, subject)
-    }
+    end
   end
 
   describe '#update_elasticsearch_index' do
@@ -113,14 +113,14 @@ shared_examples 'an Elasticsearch::Model' do |resource_search_serializer_sym: :s
     it {
       is_expected.to callback(:update_elasticsearch_index).after(:update)
     }
-    it {
+    it 'enqueues a job', :subject_created do
       expect(ElasticsearchIndexJob).to receive(:initialize_job).with(
         subject
       ).and_return(job_transaction)
       expect {
         subject.update_elasticsearch_index
       }.to have_enqueued_job(ElasticsearchIndexJob).with(job_transaction, subject, update: true)
-    }
+    end
   end
 
   describe '#as_indexed_json' do

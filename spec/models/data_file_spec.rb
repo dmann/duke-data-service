@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe DataFile, type: :model do
-  subject { child_file }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:data_file, :with_parent)
+    else
+      child_file
+    end
+  end
   let(:root_file) { FactoryGirl.build_stubbed(:data_file, :root) }
   let(:child_file) { FactoryGirl.build_stubbed(:data_file, :with_parent) }
   let(:invalid_file) { FactoryGirl.build_stubbed(:data_file, :invalid) }
@@ -19,12 +25,7 @@ RSpec.describe DataFile, type: :model do
   end
   it_behaves_like 'a logically deleted model'
 
-  shared_context 'with created data_file', include_created_data_file: true do
-    subject { FactoryGirl.create(:data_file, :with_parent) }
-  end
-  it_behaves_like 'a job_transactionable model' do
-    include_context 'with created data_file'
-  end
+  it_behaves_like 'a job_transactionable model'
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
@@ -44,7 +45,7 @@ RSpec.describe DataFile, type: :model do
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:upload) }
 
-    it 'should not allow project_id to be changed', :include_created_data_file do
+    it 'should not allow project_id to be changed', :subject_created do
       should allow_value(project).for(:project)
       expect(subject).to be_valid
       should allow_value(project.id).for(:project_id)
@@ -86,7 +87,7 @@ RSpec.describe DataFile, type: :model do
     end
   end
 
-  describe '.parent=', :include_created_data_file do
+  describe '.parent=', :subject_created do
     it 'should set project to parent.project' do
       expect(subject.parent).not_to eq other_folder
       expect(subject.project).not_to eq other_folder.project
@@ -98,7 +99,7 @@ RSpec.describe DataFile, type: :model do
     end
   end
 
-  describe '.parent_id=', :include_created_data_file do
+  describe '.parent_id=', :subject_created do
     it 'should set project to parent.project' do
       expect(subject.parent).not_to eq other_folder
       expect(subject.project).not_to eq other_folder.project
@@ -115,7 +116,7 @@ RSpec.describe DataFile, type: :model do
     it { should delegate_method(:host).to(:upload).as(:url_root) }
     it { should delegate_method(:url).to(:upload).as(:temporary_url) }
 
-    describe '#url', :include_created_data_file do
+    describe '#url', :subject_created do
       it { expect(subject.url).to include uri_encoded_name }
     end
 
@@ -219,9 +220,11 @@ RSpec.describe DataFile, type: :model do
       end
     end
 
-    describe '#current_file_version', :include_created_data_file do
+    describe '#current_file_version' do
       it { is_expected.to respond_to(:current_file_version) }
-      it { expect(subject.current_file_version).to be_persisted }
+      it 'persists the current file_version', :subject_created do
+        expect(subject.current_file_version).to be_persisted
+      end
       it { expect(subject.current_file_version).to eq subject.current_file_version }
 
       context 'with unsaved file_version' do
@@ -230,7 +233,7 @@ RSpec.describe DataFile, type: :model do
         it { expect(subject.current_file_version).to eq subject.current_file_version }
       end
 
-      context 'with multiple file_versions' do
+      context 'with multiple file_versions', :subject_created do
         let(:last_file_version) { FactoryGirl.create(:file_version, data_file: subject) }
         before do
           expect(last_file_version).to be_persisted
@@ -250,14 +253,16 @@ RSpec.describe DataFile, type: :model do
       end
     end
 
-    describe '#set_current_file_version_attributes', :include_created_data_file do
+    describe '#set_current_file_version_attributes' do
       let(:latest_version) { subject.current_file_version }
       it { is_expected.to respond_to(:set_current_file_version_attributes) }
-      it { expect(subject.set_current_file_version_attributes).to be_a FileVersion }
-      it { expect(subject.set_current_file_version_attributes).to eq latest_version }
-      context 'with persisted file_version' do
-        it { expect(latest_version).to be_persisted }
-        it { expect(subject.set_current_file_version_attributes.changed?).to be_falsey }
+      context 'when persisted', :subject_created do
+        it { expect(subject.set_current_file_version_attributes).to be_a FileVersion }
+        it { expect(subject.set_current_file_version_attributes).to eq latest_version }
+        context 'with persisted file_version' do
+          it { expect(latest_version).to be_persisted }
+          it { expect(subject.set_current_file_version_attributes.changed?).to be_falsey }
+        end
       end
       context 'with new file_version' do
         before { subject.build_file_version }
@@ -342,7 +347,6 @@ RSpec.describe DataFile, type: :model do
     include_context 'with job runner', ElasticsearchIndexJob
 
     it_behaves_like 'an Elasticsearch::Model' do
-      include_context 'with created data_file'
       context 'when ElasticsearchIndexJob::perform_later raises an error' do
         context 'with new data_file' do
           subject { FactoryGirl.build(:data_file, :root) }

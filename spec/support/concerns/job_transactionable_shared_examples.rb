@@ -14,7 +14,7 @@ shared_examples 'a job_transactionable model' do
       .after(:touch)
   }
 
-  describe '#create_transaction' do
+  describe '#create_transaction', :subject_created do
     let(:transaction_state) {'testing'}
 
     context 'with nil current_transaction' do
@@ -63,7 +63,7 @@ shared_examples 'a job_transactionable model' do
     it { expect(subject.root_update_transaction).to be_a JobTransaction }
   end
 
-  describe '#touch' do
+  describe '#touch', :subject_created do
     before do
       expect(subject).to receive(:root_update_transaction)
     end
