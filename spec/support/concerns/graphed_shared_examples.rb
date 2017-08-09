@@ -13,11 +13,11 @@ shared_examples 'a graphed node' do |auto_create: false, logically_deleted: fals
       expect(subject).to be
     end
 
-    it 'should auto_create' do
+    it 'should auto_create', :subject_created do
       expect(graph_node_name.constantize.where(model_id: subject.id, model_kind: subject.kind).first).to be
     end
 
-    it 'should return the graphed model' do
+    it 'should return the graphed model', :subject_created do
       expect(graph_node_name.constantize.where(model_id: subject.id, model_kind: subject.kind).count).to eq(1)
       expect(subject.graph_node).to be
       expect(graph_node_name.constantize.where(model_id: subject.id, model_kind: subject.kind).count).to eq(1)
@@ -25,12 +25,12 @@ shared_examples 'a graphed node' do |auto_create: false, logically_deleted: fals
       expect(subject.graph_node.model_kind).to eq(subject.kind)
     end
   else
-    it 'should not auto_create' do
+    it 'should not auto_create', :subject_created do
       expect(subject).to be
       expect(graph_node_name.constantize.where(model_id: subject.id, model_kind: subject.kind).first).not_to be
     end
 
-    it 'should create_graph_node' do
+    it 'should create_graph_node', :subject_created do
       expect(subject).to be
       expect(graph_node_name.constantize.where(model_id: subject.id, model_kind: subject.kind).first).not_to be
       subject.create_graph_node
@@ -38,7 +38,7 @@ shared_examples 'a graphed node' do |auto_create: false, logically_deleted: fals
     end
   end
 
-  context 'when model is deleted' do
+  context 'when model is deleted', :subject_created do
     before do
       expect(subject).to be
       if auto_create

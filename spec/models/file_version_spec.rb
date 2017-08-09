@@ -1,16 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe FileVersion, type: :model do
-  subject { file_version }
-  let(:file_version) { FactoryGirl.build_stubbed(:file_version) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:file_version)
+    else
+      FactoryGirl.build_stubbed(:file_version)
+    end
+  end
   let(:deleted_file_version) { FactoryGirl.build_stubbed(:file_version, :deleted) }
   let(:uri_encoded_name) { URI.encode(subject.data_file.name) }
   let(:other_upload) { FactoryGirl.build_stubbed(:upload, :completed, :with_fingerprint) }
-
-  shared_context 'with created file_version', include_created_file_version: true do
-    subject { file_version }
-    let(:file_version)  { FactoryGirl.create(:file_version) }
-  end
 
   it_behaves_like 'an audited model'
   it_behaves_like 'a kind' do
@@ -20,9 +20,7 @@ RSpec.describe FileVersion, type: :model do
   end
 
   it_behaves_like 'a logically deleted model'
-  it_behaves_like 'a graphed node', auto_create: true, logically_deleted: true do
-    include_context 'with created file_version'
-  end
+  it_behaves_like 'a graphed node', auto_create: true, logically_deleted: true
 
   describe 'associations' do
     it { is_expected.to belong_to(:data_file) }
@@ -50,7 +48,7 @@ RSpec.describe FileVersion, type: :model do
       it { is_expected.not_to validate_presence_of(:upload_id) }
     end
 
-    it 'should not allow upload_id to be changed', :include_created_file_version do
+    it 'should not allow upload_id to be changed', :subject_created do
       original_upload = subject.upload
       should allow_value(original_upload).for(:upload)
       expect(subject).to be_valid
@@ -119,14 +117,14 @@ RSpec.describe FileVersion, type: :model do
       end
     end
 
-    describe '#deletion_allowed?', :include_created_file_version do
+    describe '#deletion_allowed?', :subject_created do
       let(:data_file) { subject.data_file }
       it { is_expected.to respond_to(:deletion_allowed?) }
 
       context 'when not current_file_version' do
         let(:first_file_version) { data_file.file_versions.first }
         before(:each) do
-          expect(file_version).to be_persisted
+          expect(subject).to be_persisted
           expect(data_file.reload).to be_truthy
         end
         it { expect(first_file_version).not_to eq data_file.current_file_version }
