@@ -1,10 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe AuthRole, type: :model do
-  describe 'validations' do
-    subject {FactoryGirl.create(:auth_role)}
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:auth_role)
+    else
+      FactoryGirl.build_stubbed(:auth_role)
+    end
+  end
 
-    it 'should require a unique id' do
+  describe 'validations' do
+    it 'should require a unique id', :subject_created do
       should validate_presence_of(:id)
       should validate_uniqueness_of(:id)
     end

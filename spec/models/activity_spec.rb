@@ -1,8 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe Activity, type: :model do
-  subject { activity }
-  let(:activity) { FactoryGirl.create(:activity) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:activity)
+    else
+      FactoryGirl.build_stubbed(:activity)
+    end
+  end
   let(:deleted_activity) { FactoryGirl.create(:activity, :deleted) }
 
   it_behaves_like 'an audited model'
@@ -16,7 +21,7 @@ RSpec.describe Activity, type: :model do
   it_behaves_like 'a graphed node', auto_create: true, logically_deleted: true
 
   context 'started_on' do
-    context 'default' do
+    context 'default', :subject_created do
       it 'is expected to be set to the current time' do
         before_time = DateTime.now
         expect(subject).to be_persisted
@@ -52,7 +57,7 @@ RSpec.describe Activity, type: :model do
       should allow_value(false).for(:is_deleted)
     end
 
-    it 'should require ended_on to be greater than or equal to started_on' do
+    it 'should require ended_on to be greater than or equal to started_on', :subject_created do
       subject.started_on = DateTime.now
       subject.ended_on = DateTime.now
       expect(subject).to be_valid
