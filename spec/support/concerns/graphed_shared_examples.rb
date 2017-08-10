@@ -216,20 +216,20 @@ shared_examples 'A ProvenanceGraph' do |
   excludes_relationship_syms: [],
   with_restricted_properties: false|
 
-  let(:includes_nodes) {
+  let!(:includes_nodes) {
     includes_node_syms.map{|enode| send(enode) }
   }
-  let(:excludes_nodes) {
+  let!(:excludes_nodes) {
     excludes_node_syms.map{|enode| send(enode) }
   }
-  let(:includes_relationships) {
+  let!(:includes_relationships) {
     includes_relationship_syms.map{|enode| send(enode) }
   }
-  let(:excludes_relationships) {
+  let!(:excludes_relationships) {
     excludes_relationship_syms.map{|enode| send(enode) }
   }
   if with_restricted_properties
-    let (:properties_restricted) { true }
+    let(:properties_restricted) { true }
   else
     let(:properties_restricted) { false }
   end

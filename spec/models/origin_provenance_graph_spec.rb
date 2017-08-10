@@ -4,9 +4,9 @@ RSpec.describe OriginProvenanceGraph do
   let(:policy_scope) { Proc.new {|scope| scope } }
 
   # (fv1ga)-[generated]->(fv1)
-  let!(:fv1) { FactoryGirl.create(:file_version, label: "FV1") }
-  let!(:fv1ga) { FactoryGirl.create(:activity, name: "FV1GA") }
-  let!(:fv1ga_generated_fv1) {
+  let(:fv1) { FactoryGirl.create(:file_version, label: "FV1") }
+  let(:fv1ga) { FactoryGirl.create(:activity, name: "FV1GA") }
+  let(:fv1ga_generated_fv1) {
     FactoryGirl.create(:generated_by_activity_prov_relation,
       relatable_from: fv1,
       relatable_to: fv1ga
@@ -14,16 +14,16 @@ RSpec.describe OriginProvenanceGraph do
  }
 
   # (fv2)-(generatedBy)->(fv2ga)-[used]-(used_by_fvg2a)
-  let!(:fv2) { FactoryGirl.create(:file_version, label: "FV2") }
-  let!(:fv2ga) { FactoryGirl.create(:activity, name: "FV2GA") }
-  let!(:fv2ga_generated_fv2) {
+  let(:fv2) { FactoryGirl.create(:file_version, label: "FV2") }
+  let(:fv2ga) { FactoryGirl.create(:activity, name: "FV2GA") }
+  let(:fv2ga_generated_fv2) {
     FactoryGirl.create(:generated_by_activity_prov_relation,
       relatable_from: fv2,
       relatable_to: fv2ga
     )
   }
-  let!(:used_by_fv2ga) { FactoryGirl.create(:file_version, label: "USED_BY_FV2GA") }
-  let!(:fv2ga_used_used_by_fv2ga) {
+  let(:used_by_fv2ga) { FactoryGirl.create(:file_version, label: "USED_BY_FV2GA") }
+  let(:fv2ga_used_used_by_fv2ga) {
     FactoryGirl.create(:used_prov_relation,
       relatable_to: used_by_fv2ga,
       relatable_from: fv2ga
@@ -31,14 +31,14 @@ RSpec.describe OriginProvenanceGraph do
   }
 
   # (fv2)-(derivedFrom)->(fv2_derived_from)
-  let!(:fv2_derived_from) { FactoryGirl.create(:file_version, label: "FV2_DERIVED_FROM") }
-  let!(:fv2_derived_from_fv2_derived_from) {
+  let(:fv2_derived_from) { FactoryGirl.create(:file_version, label: "FV2_DERIVED_FROM") }
+  let(:fv2_derived_from_fv2_derived_from) {
     FactoryGirl.create(:derived_from_file_version_prov_relation,
       relatable_to: fv2_derived_from,
       relatable_from: fv2
     )
   }
-  let!(:file_versions) { [ {id: fv1.id}, {id: fv2.id} ] }
+  let(:file_versions) { [ {id: fv1.id}, {id: fv2.id} ] }
 
   it { expect(described_class).to include(ActiveModel::Serialization) }
 
