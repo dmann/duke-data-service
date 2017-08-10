@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe Upload, type: :model do
-  subject { FactoryGirl.create(:upload, :with_chunks) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:upload, :with_chunks)
+    else
+      FactoryGirl.build_stubbed(:upload, :with_chunks)
+    end
+  end
   let(:fingerprint) { FactoryGirl.create(:fingerprint, upload: subject) }
   let(:completed_upload) { FactoryGirl.create(:upload, :with_chunks, :with_fingerprint, :completed) }
   let(:upload_with_error) { FactoryGirl.create(:upload, :with_chunks, :with_error) }
@@ -40,7 +46,7 @@ RSpec.describe Upload, type: :model do
       it { is_expected.to validate_presence_of :fingerprints }
     end
 
-    context 'when completed_at is nil' do
+    context 'when completed_at is nil', :subject_created do
       it { is_expected.not_to be_completed_at }
       it { is_expected.not_to allow_value([fingerprint]).for(:fingerprints) }
     end
@@ -93,7 +99,7 @@ RSpec.describe Upload, type: :model do
         }
       end
 
-      context 'when not consistent' do
+      context 'when not consistent', :subject_created do
         before do
           expect(subject.update(is_consistent: false)).to be_truthy
         end
@@ -132,20 +138,20 @@ RSpec.describe Upload, type: :model do
     before { subject.fingerprints_attributes = [fingerprint_attributes] }
 
     it { is_expected.to respond_to :complete }
-    it {
+    it 'enqueues a job', :subject_created do
       expect(subject.completed_at).to be_nil
       expect {
         expect(subject.complete).to be_truthy
       }.to have_enqueued_job(UploadCompletionJob)
       subject.reload
       expect(subject.completed_at).not_to be_nil
-    }
+    end
   end
 
   describe '#has_integrity_exception?' do
     it { is_expected.to respond_to :has_integrity_exception? }
 
-    context 'when upload is_consistent and has an error' do
+    context 'when upload is_consistent and has an error', :subject_created do
       it {
         exactly_now = DateTime.now
         expect(
@@ -159,7 +165,7 @@ RSpec.describe Upload, type: :model do
       }
     end
 
-    context 'when upload is_consistent and does not have an error' do
+    context 'when upload is_consistent and does not have an error', :subject_created do
       it {
         exactly_now = DateTime.now
         expect(
