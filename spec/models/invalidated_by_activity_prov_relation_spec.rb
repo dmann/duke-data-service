@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe InvalidatedByActivityProvRelation, type: :model do
-  subject { FactoryGirl.create(:invalidated_by_activity_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:invalidated_by_activity_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:invalidated_by_activity_prov_relation)
+    end
+  end
   let(:resource_serializer) { InvalidatedByActivityProvRelationSerializer }
   let(:expected_relationship_type) { 'was-invalidated-by' }
 
@@ -25,7 +31,7 @@ RSpec.describe InvalidatedByActivityProvRelation, type: :model do
     it { is_expected.not_to allow_value('FileVersion').for(:relatable_to_type) }
     it { is_expected.not_to allow_value('SoftwareAgent').for(:relatable_to_type) }
 
-    describe 'undeleted FileVersion' do
+    describe 'undeleted FileVersion', :subject_created do
       before do
         subject.relatable_from.update_attribute(:is_deleted, false)
       end

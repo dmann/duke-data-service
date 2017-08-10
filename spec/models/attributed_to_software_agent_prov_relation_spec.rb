@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe AttributedToSoftwareAgentProvRelation, type: :model do
-  subject { FactoryGirl.create(:attributed_to_software_agent_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:attributed_to_software_agent_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:attributed_to_software_agent_prov_relation)
+    end
+  end
   let(:resource_serializer) { AttributedToSoftwareAgentProvRelationSerializer }
   let(:expected_relationship_type) { 'was-attributed-to' }
   it_behaves_like 'a ProvRelation' do

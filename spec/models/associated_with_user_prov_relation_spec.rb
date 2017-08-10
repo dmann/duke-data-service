@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe AssociatedWithUserProvRelation, type: :model do
-  subject { FactoryGirl.create(:associated_with_user_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:associated_with_user_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:associated_with_user_prov_relation)
+    end
+  end
   let(:resource_serializer) { AssociatedWithUserProvRelationSerializer }
   let(:expected_relationship_type) { 'was-associated-with' }
 

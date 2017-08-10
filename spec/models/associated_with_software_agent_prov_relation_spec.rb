@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe AssociatedWithSoftwareAgentProvRelation, type: :model do
-  subject { FactoryGirl.create(:associated_with_software_agent_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:associated_with_software_agent_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:associated_with_software_agent_prov_relation)
+    end
+  end
   let(:resource_serializer) { AssociatedWithSoftwareAgentProvRelationSerializer }
   let(:expected_relationship_type) { 'was-associated-with' }
 

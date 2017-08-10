@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe GeneratedByActivityProvRelation, type: :model do
-  subject { FactoryGirl.create(:generated_by_activity_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:generated_by_activity_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:generated_by_activity_prov_relation)
+    end
+  end
   let(:resource_serializer) { GeneratedByActivityProvRelationSerializer }
   let(:expected_relationship_type) { 'was-generated-by' }
 
@@ -24,7 +30,9 @@ RSpec.describe GeneratedByActivityProvRelation, type: :model do
     it { is_expected.not_to allow_value('Project').for(:relatable_to_type) }
     it { is_expected.not_to allow_value('FileVersion').for(:relatable_to_type) }
     it { is_expected.not_to allow_value('SoftwareAgent').for(:relatable_to_type) }
-    it { is_expected.to validate_uniqueness_of(:relatable_from_id).scoped_to(:relatable_to_id).case_insensitive }
+    it 'validates uniqueness', :subject_created do
+      is_expected.to validate_uniqueness_of(:relatable_from_id).scoped_to(:relatable_to_id).case_insensitive
+    end
 
     context 'already used by activity' do
       let(:used_and_generated_by) { FactoryGirl.create(:activity) }

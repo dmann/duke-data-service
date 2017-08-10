@@ -1,7 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe UsedProvRelation, type: :model do
-  subject { FactoryGirl.create(:used_prov_relation) }
+  subject do |example|
+    if example.metadata[:subject_created]
+      FactoryGirl.create(:used_prov_relation)
+    else
+      FactoryGirl.build_stubbed(:used_prov_relation)
+    end
+  end
   let(:resource_serializer) { UsedProvRelationSerializer }
   let(:expected_relationship_type) { 'used' }
 
