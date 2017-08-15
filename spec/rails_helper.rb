@@ -125,3 +125,49 @@ module BunnyMock
     end
   end
 end
+
+class StubWithUuid < FactoryGirl::Strategy::Stub
+  DISABLED_PERSISTENCE_METHODS = [
+    :connection,
+    :decrement!,
+    :decrement,
+    :delete,
+    :destroy!,
+    :destroy,
+    :increment!,
+    :increment,
+    :reload,
+    :save!,
+    :save,
+    :toggle!,
+    :toggle,
+    :touch,
+    :update!,
+    :update,
+    :update_attribute,
+    :update_attributes!,
+    :update_attributes,
+    :update_column,
+    :update_columns,
+  ].freeze
+
+  def association(runner)
+    super(runner)
+  end
+
+  def result(evaluation)
+    record = super(evaluation).tap do |instance|
+      instance.instance_eval do
+        def destroyed?
+          nil
+        end
+      end
+    end
+    record.run_callbacks :save do
+      record.id = SecureRandom.uuid if record.id.nil? && record.class.columns_hash['id'].type == :uuid
+    end
+    record
+  end
+end
+
+FactoryGirl.register_strategy(:build_stubbed, StubWithUuid)
