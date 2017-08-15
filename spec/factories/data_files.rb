@@ -16,6 +16,12 @@ FactoryGirl.define do
       end
     end
 
+    after(:stub) do |f, evaluator|
+      unless evaluator.without_upload
+        f.upload = evaluator.upload || build_stubbed(:upload, :completed, :with_fingerprint)
+      end
+    end
+
     trait :with_parent do
       association :parent, factory: :folder
       project { parent.project }
