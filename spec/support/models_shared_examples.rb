@@ -84,7 +84,7 @@ shared_examples 'a ProvRelation' do
     let(:rel_type) { subject.relationship_type.split('-').map{|part| part.capitalize}.join('') }
   end
 
-  it 'should set the relationship_type automatically' do
+  it 'should set the relationship_type automatically', :subject_created do
     built_relation = described_class.new(
       creator: subject.creator,
       relatable_from: subject.relatable_from,

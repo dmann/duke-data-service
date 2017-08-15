@@ -48,7 +48,7 @@ RSpec.describe FileVersion, type: :model do
       it { is_expected.not_to validate_presence_of(:upload_id) }
     end
 
-    it 'should not allow upload_id to be changed', :subject_created do
+    it 'should not allow upload_id to be changed' do
       original_upload = subject.upload
       should allow_value(original_upload).for(:upload)
       expect(subject).to be_valid

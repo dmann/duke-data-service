@@ -21,8 +21,8 @@ RSpec.describe Activity, type: :model do
   it_behaves_like 'a graphed node', auto_create: true, logically_deleted: true
 
   context 'started_on' do
-    context 'default', :subject_created do
-      it 'is expected to be set to the current time' do
+    context 'default' do
+      it 'is expected to be set to the current time', :subject_created do
         before_time = DateTime.now
         expect(subject).to be_persisted
         expect(subject.started_on).not_to be_nil
@@ -57,7 +57,7 @@ RSpec.describe Activity, type: :model do
       should allow_value(false).for(:is_deleted)
     end
 
-    it 'should require ended_on to be greater than or equal to started_on', :subject_created do
+    it 'should require ended_on to be greater than or equal to started_on' do
       subject.started_on = DateTime.now
       subject.ended_on = DateTime.now
       expect(subject).to be_valid

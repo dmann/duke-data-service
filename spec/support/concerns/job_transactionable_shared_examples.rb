@@ -14,7 +14,7 @@ shared_examples 'a job_transactionable model' do
       .after(:touch)
   }
 
-  describe '#create_transaction', :subject_created do
+  describe '#create_transaction' do
     let(:transaction_state) {'testing'}
 
     context 'with nil current_transaction' do
@@ -45,8 +45,10 @@ shared_examples 'a job_transactionable model' do
       }
     end
 
-    it { expect(subject.save).to be_truthy }
-    it { expect{subject.save}.to change{JobTransaction.count} }
+    context 'when subject#save called', :subject_created do
+      it { expect(subject.save).to be_truthy }
+      it { expect{subject.save}.to change{JobTransaction.count} }
+    end
   end
 
   describe '#root_create_transaction' do

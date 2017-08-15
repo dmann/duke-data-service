@@ -45,7 +45,7 @@ RSpec.describe DataFile, type: :model do
     it { is_expected.to validate_presence_of(:project_id) }
     it { is_expected.to validate_presence_of(:upload) }
 
-    it 'should not allow project_id to be changed', :subject_created do
+    it 'should not allow project_id to be changed' do
       should allow_value(project).for(:project)
       expect(subject).to be_valid
       should allow_value(project.id).for(:project_id)
@@ -87,7 +87,7 @@ RSpec.describe DataFile, type: :model do
     end
   end
 
-  describe '.parent=', :subject_created do
+  describe '.parent=' do
     it 'should set project to parent.project' do
       expect(subject.parent).not_to eq other_folder
       expect(subject.project).not_to eq other_folder.project
@@ -99,7 +99,7 @@ RSpec.describe DataFile, type: :model do
     end
   end
 
-  describe '.parent_id=', :subject_created do
+  describe '.parent_id=' do
     it 'should set project to parent.project' do
       expect(subject.parent).not_to eq other_folder
       expect(subject.project).not_to eq other_folder.project
@@ -116,7 +116,7 @@ RSpec.describe DataFile, type: :model do
     it { should delegate_method(:host).to(:upload).as(:url_root) }
     it { should delegate_method(:url).to(:upload).as(:temporary_url) }
 
-    describe '#url', :subject_created do
+    describe '#url' do
       it { expect(subject.url).to include uri_encoded_name }
     end
 

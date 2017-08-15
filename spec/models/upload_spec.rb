@@ -46,7 +46,7 @@ RSpec.describe Upload, type: :model do
       it { is_expected.to validate_presence_of :fingerprints }
     end
 
-    context 'when completed_at is nil', :subject_created do
+    context 'when completed_at is nil' do
       it { is_expected.not_to be_completed_at }
       it { is_expected.not_to allow_value([fingerprint]).for(:fingerprints) }
     end
