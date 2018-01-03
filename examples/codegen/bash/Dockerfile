@@ -1,7 +1,7 @@
 FROM ubuntu:16.10
 
 RUN apt-get update -y && apt-get full-upgrade -y
-RUN apt-get install -y bash-completion zsh curl cowsay git vim bsdmainutils
+RUN apt-get install -y bash-completion zsh curl cowsay git vim bsdmainutils jq uuid-runtime
 
 ADD dukeds-cli /usr/bin/dukeds-cli
 ADD _dukeds-cli /usr/local/share/zsh/site-functions/_dukeds-cli
