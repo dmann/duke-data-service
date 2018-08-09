@@ -10,11 +10,12 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180403120319) do
+ActiveRecord::Schema.define(version: 20180808192502) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
+  enable_extension "pgcrypto"
 
   create_table "activities", id: :uuid, default: -> { "uuid_generate_v4()" }, force: :cascade do |t|
     t.string "name"
@@ -41,6 +42,22 @@ ActiveRecord::Schema.define(version: 20180403120319) do
     t.string "key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "audit_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "auditable_type"
+    t.uuid "auditable_id"
+    t.datetime "created_on"
+    t.uuid "created_by"
+    t.datetime "last_updated_on"
+    t.uuid "last_updated_by"
+    t.datetime "deleted_on"
+    t.uuid "deleted_by"
+    t.datetime "restored_on"
+    t.uuid "restored_by"
+    t.datetime "purged_on"
+    t.uuid "purged_by"
+    t.index ["auditable_id", "auditable_type"], name: "as_auditable_index"
   end
 
   create_table "audits", id: :serial, force: :cascade do |t|
