@@ -117,7 +117,7 @@ shared_context 'with concurrent calls' do |object_list:, method:|
   self.use_transactional_tests = false
   let(:objects) { send(object_list) }
   after do
-    ActiveRecord::Base.subclasses.each(&:delete_all)
+    ActiveRecord::Base.subclasses.reject(&:abstract_class).each(&:delete_all)
   end
   before do
     expect(ActiveRecord::Base.connection.pool.size).to be > 4
