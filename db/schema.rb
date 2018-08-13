@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180808192502) do
+ActiveRecord::Schema.define(version: 20180813142534) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -48,16 +48,16 @@ ActiveRecord::Schema.define(version: 20180808192502) do
     t.string "auditable_type"
     t.uuid "auditable_id"
     t.datetime "created_on"
-    t.uuid "created_by"
+    t.uuid "created_by_id"
     t.datetime "last_updated_on"
-    t.uuid "last_updated_by"
+    t.uuid "last_updated_by_id"
     t.datetime "deleted_on"
-    t.uuid "deleted_by"
+    t.uuid "deleted_by_id"
     t.datetime "restored_on"
-    t.uuid "restored_by"
+    t.uuid "restored_by_id"
     t.datetime "purged_on"
-    t.uuid "purged_by"
-    t.index ["auditable_id", "auditable_type"], name: "as_auditable_index"
+    t.uuid "purged_by_id"
+    t.index ["auditable_type", "auditable_id"], name: "as_auditable_index"
   end
 
   create_table "audits", id: :serial, force: :cascade do |t|
@@ -75,8 +75,8 @@ ActiveRecord::Schema.define(version: 20180808192502) do
     t.string "remote_address"
     t.string "request_uuid"
     t.datetime "created_at"
-    t.index ["associated_id", "associated_type"], name: "associated_index"
-    t.index ["auditable_id", "auditable_type"], name: "auditable_index"
+    t.index ["associated_type", "associated_id"], name: "associated_index"
+    t.index ["auditable_type", "auditable_id"], name: "auditable_index"
     t.index ["comment"], name: "index_audits_on_comment", using: :gin
     t.index ["created_at"], name: "index_audits_on_created_at"
     t.index ["request_uuid"], name: "index_audits_on_request_uuid"
