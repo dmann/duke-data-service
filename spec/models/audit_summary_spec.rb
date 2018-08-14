@@ -34,6 +34,14 @@ RSpec.describe AuditSummary, type: :model do
 
     context 'when auditable is not set' do
       subject { FactoryBot.create(:audit_summary) }
+      let(:audit) { another_audit_summary.auditable.audits.first }
+
+      it 'sets auditable to audit.auditable' do
+        expect(subject.auditable).to be_nil
+        expect{ call_method }.not_to raise_error
+        expect(subject.auditable).to eq audit.auditable
+      end
+
       context 'with nil parameter' do
         let(:audit) { nil }
         it { expect{ call_method }.to raise_error 'Audit cannot be nil' }
@@ -42,11 +50,6 @@ RSpec.describe AuditSummary, type: :model do
       context 'with non-Audit parameter' do
         let(:audit) { another_audit_summary }
         it { expect{ call_method }.to raise_error 'Audit parameter must be of type Audit' }
-      end
-
-      context 'when Audit has different auditable' do
-        let(:audit) { another_audit_summary.auditable.audits.first }
-        it { expect{ call_method }.not_to raise_error }
       end
     end
   end

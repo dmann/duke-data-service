@@ -10,5 +10,6 @@ class AuditSummary < ApplicationRecord
     raise 'Audit cannot be nil' if audit.nil?
     raise 'Audit parameter must be of type Audit' unless audit.is_a? Audited::Audit
     raise 'Audit is associated with a different auditable object' if auditable && auditable != audit.auditable
+    self.auditable = audit.auditable
   end
 end
