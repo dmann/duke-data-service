@@ -40,7 +40,7 @@ RSpec.describe AuditSummary, type: :model do
     context 'when audit action is "update"' do
       let(:audit) { auditable.audits.second }
       before(:each) do
-        expect(auditable.update(display_name: 'foo')).to be_truthy
+        expect(auditable.update(name: 'foo')).to be_truthy
         expect(audit.action).to eq 'update'
         expect(audit.user).not_to be_nil
         expect(audit.created_at).not_to be_nil
@@ -99,7 +99,7 @@ RSpec.describe AuditSummary, type: :model do
       context 'when audit action is "update"' do
         let(:audit) { auditable.audits.second }
         before(:each) do
-          expect(auditable.update(display_name: 'foo')).to be_truthy
+          expect(auditable.update(name: 'foo')).to be_truthy
           expect(audit.action).to eq 'update'
           expect(audit.user).not_to be_nil
           expect(audit.created_at).not_to be_nil
