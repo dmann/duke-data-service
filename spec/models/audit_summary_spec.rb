@@ -15,11 +15,14 @@ RSpec.describe AuditSummary, type: :model do
     let(:audit) { auditable.audits.first }
     let(:call_method) { subject.set_attributes_from_audit(audit) }
     let(:audit_user) { FactoryBot.create(:user) }
+    let(:audit_attributes_comment) { {} }
 
     around(:each) do |example|
+      Audited.store[:audit_attributes] = { comment: audit_attributes_comment }
       Audited.audit_class.as_user(audit_user) do
         example.run
       end
+      Audited.store.clear
     end
 
     it { is_expected.to respond_to(:set_attributes_from_audit).with(1).argument }
@@ -49,6 +52,25 @@ RSpec.describe AuditSummary, type: :model do
       it { expect(subject.changed).to match_array ["last_updated_by_id", "last_updated_on"] }
       it { expect(subject.last_updated_by).to eq audit.user }
       it { expect(subject.last_updated_on).to eq audit.created_at }
+    end
+
+    context 'when audit is a logical delete' do
+      let(:audit) { auditable.audits.second }
+      let(:audit_attributes_comment) { { action: 'DELETE' } }
+      before(:each) do
+        expect(auditable.update(is_deleted: true)).to be_truthy
+        expect(audit.action).to eq 'update'
+        expect(audit.comment['action']).to eq 'DELETE'
+        expect(audit.user).not_to be_nil
+        expect(audit.created_at).not_to be_nil
+        expect{ call_method }.not_to raise_error
+      end
+
+      it { expect(subject.changed).to match_array ["deleted_by_id", "deleted_on", "last_updated_by_id", "last_updated_on"] }
+      it { expect(subject.last_updated_by).to eq audit.user }
+      it { expect(subject.last_updated_on).to eq audit.created_at }
+      it { expect(subject.deleted_by).to eq audit.user }
+      it { expect(subject.deleted_on).to eq audit.created_at }
     end
 
     context 'with nil parameter' do
@@ -108,6 +130,25 @@ RSpec.describe AuditSummary, type: :model do
         it { expect(subject.changed).to match_array ["last_updated_by_id", "last_updated_on", "auditable_id", "auditable_type"] }
         it { expect(subject.last_updated_by).to eq audit.user }
         it { expect(subject.last_updated_on).to eq audit.created_at }
+      end
+
+      context 'when audit is a logical delete' do
+        let(:audit) { auditable.audits.second }
+        let(:audit_attributes_comment) { { action: 'DELETE' } }
+        before(:each) do
+          expect(auditable.update(is_deleted: true)).to be_truthy
+          expect(audit.action).to eq 'update'
+          expect(audit.comment['action']).to eq 'DELETE'
+          expect(audit.user).not_to be_nil
+          expect(audit.created_at).not_to be_nil
+          expect{ call_method }.not_to raise_error
+        end
+
+        it { expect(subject.changed).to match_array ["deleted_by_id", "deleted_on", "last_updated_by_id", "last_updated_on", "auditable_id", "auditable_type"] }
+        it { expect(subject.last_updated_by).to eq audit.user }
+        it { expect(subject.last_updated_on).to eq audit.created_at }
+        it { expect(subject.deleted_by).to eq audit.user }
+        it { expect(subject.deleted_on).to eq audit.created_at }
       end
 
       context 'with nil parameter' do

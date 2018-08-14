@@ -17,6 +17,11 @@ class AuditSummary < ApplicationRecord
     else
       self.last_updated_by = audit.user
       self.last_updated_on = audit.created_at
+      if audit.comment['action'] == 'DELETE' &&
+          audit.audited_changes['is_deleted'][1]
+        self.deleted_by = audit.user
+        self.deleted_on = audit.created_at
+      end
     end
   end
 end
