@@ -28,7 +28,8 @@ RSpec.describe AuditSummary, type: :model do
     context 'when audit action is "create"' do
       before(:each) do
         expect(audit.action).to eq 'create'
-          expect(audit.user).not_to be_nil
+        expect(audit.user).not_to be_nil
+        expect(audit.created_at).not_to be_nil
         expect{ call_method }.not_to raise_error
       end
       it { expect(subject.changed).to match_array ["created_by_id", "created_on"] }
@@ -37,6 +38,17 @@ RSpec.describe AuditSummary, type: :model do
     end
 
     context 'when audit action is "update"' do
+      let(:audit) { auditable.audits.second }
+      before(:each) do
+        expect(auditable.update(display_name: 'foo')).to be_truthy
+        expect(audit.action).to eq 'update'
+        expect(audit.user).not_to be_nil
+        expect(audit.created_at).not_to be_nil
+        expect{ call_method }.not_to raise_error
+      end
+      it { expect(subject.changed).to match_array ["last_updated_by_id", "last_updated_on"] }
+      it { expect(subject.last_updated_by).to eq audit.user }
+      it { expect(subject.last_updated_on).to eq audit.created_at }
     end
 
     context 'with nil parameter' do
@@ -65,7 +77,7 @@ RSpec.describe AuditSummary, type: :model do
 
     context 'when auditable is not set' do
       subject { FactoryBot.create(:audit_summary) }
-      let(:audit) { another_audit_summary.auditable.audits.first }
+      let(:auditable) { another_audit_summary.auditable }
 
       it 'sets auditable to audit.auditable' do
         expect(subject.auditable).to be_nil
@@ -82,6 +94,20 @@ RSpec.describe AuditSummary, type: :model do
         it { expect(subject.changed).to match_array ["created_by_id", "created_on", "auditable_id", "auditable_type"] }
         it { expect(subject.created_by).to eq audit.user }
         it { expect(subject.created_on).to eq audit.created_at }
+      end
+
+      context 'when audit action is "update"' do
+        let(:audit) { auditable.audits.second }
+        before(:each) do
+          expect(auditable.update(display_name: 'foo')).to be_truthy
+          expect(audit.action).to eq 'update'
+          expect(audit.user).not_to be_nil
+          expect(audit.created_at).not_to be_nil
+          expect{ call_method }.not_to raise_error
+        end
+        it { expect(subject.changed).to match_array ["last_updated_by_id", "last_updated_on", "auditable_id", "auditable_type"] }
+        it { expect(subject.last_updated_by).to eq audit.user }
+        it { expect(subject.last_updated_on).to eq audit.created_at }
       end
 
       context 'with nil parameter' do
