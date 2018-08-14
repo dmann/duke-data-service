@@ -11,11 +11,33 @@ RSpec.describe AuditSummary, type: :model do
   describe '#set_attributes_from_audit' do
     subject { FactoryBot.create(:audit_summary, :with_auditable) }
     let(:another_audit_summary) { FactoryBot.create(:audit_summary, :with_auditable) }
-    let(:audit) { subject.auditable.audits.first }
+    let(:auditable) { subject.auditable }
+    let(:audit) { auditable.audits.first }
     let(:call_method) { subject.set_attributes_from_audit(audit) }
+    let(:audit_user) { FactoryBot.create(:user) }
+
+    around(:each) do |example|
+      Audited.audit_class.as_user(audit_user) do
+        example.run
+      end
+    end
 
     it { is_expected.to respond_to(:set_attributes_from_audit).with(1).argument }
     it { expect{ call_method }.not_to raise_error }
+
+    context 'when audit action is "create"' do
+      before(:each) do
+        expect(audit.action).to eq 'create'
+          expect(audit.user).not_to be_nil
+        expect{ call_method }.not_to raise_error
+      end
+      it { expect(subject.changed).to match_array ["created_by_id", "created_on"] }
+      it { expect(subject.created_by).to eq audit.user }
+      it { expect(subject.created_on).to eq audit.created_at }
+    end
+
+    context 'when audit action is "update"' do
+    end
 
     context 'with nil parameter' do
       let(:audit) { nil }
@@ -49,6 +71,17 @@ RSpec.describe AuditSummary, type: :model do
         expect(subject.auditable).to be_nil
         expect{ call_method }.not_to raise_error
         expect(subject.auditable).to eq audit.auditable
+      end
+
+      context 'when audit action is "create"' do
+        before(:each) do
+          expect(audit.action).to eq 'create'
+          expect(audit.user).not_to be_nil
+          expect{ call_method }.not_to raise_error
+        end
+        it { expect(subject.changed).to match_array ["created_by_id", "created_on", "auditable_id", "auditable_type"] }
+        it { expect(subject.created_by).to eq audit.user }
+        it { expect(subject.created_on).to eq audit.created_at }
       end
 
       context 'with nil parameter' do
