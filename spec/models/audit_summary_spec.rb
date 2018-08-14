@@ -19,17 +19,26 @@ RSpec.describe AuditSummary, type: :model do
 
     context 'with nil parameter' do
       let(:audit) { nil }
-      it { expect{ call_method }.to raise_error 'Audit cannot be nil' }
+      it 'raises excpetion and remains unchanged' do
+        expect{ call_method }.to raise_error 'Audit cannot be nil'
+        is_expected.not_to be_changed
+      end
     end
 
     context 'with non-Audit parameter' do
       let(:audit) { another_audit_summary }
-      it { expect{ call_method }.to raise_error 'Audit parameter must be of type Audit' }
+      it 'raises excpetion and remains unchanged' do
+        expect{ call_method }.to raise_error 'Audit parameter must be of type Audit'
+        is_expected.not_to be_changed
+      end
     end
 
     context 'when Audit has different auditable' do
       let(:audit) { another_audit_summary.auditable.audits.first }
-      it { expect{ call_method }.to raise_error 'Audit is associated with a different auditable object' }
+      it 'raises excpetion and remains unchanged' do
+        expect{ call_method }.to raise_error 'Audit is associated with a different auditable object'
+        is_expected.not_to be_changed
+      end
     end
 
     context 'when auditable is not set' do
@@ -44,12 +53,18 @@ RSpec.describe AuditSummary, type: :model do
 
       context 'with nil parameter' do
         let(:audit) { nil }
-        it { expect{ call_method }.to raise_error 'Audit cannot be nil' }
+        it 'raises excpetion and remains unchanged' do
+          expect{ call_method }.to raise_error 'Audit cannot be nil'
+          is_expected.not_to be_changed
+        end
       end
 
       context 'with non-Audit parameter' do
         let(:audit) { another_audit_summary }
-        it { expect{ call_method }.to raise_error 'Audit parameter must be of type Audit' }
+        it 'raises excpetion and remains unchanged' do
+          expect{ call_method }.to raise_error 'Audit parameter must be of type Audit'
+          is_expected.not_to be_changed
+        end
       end
     end
   end
