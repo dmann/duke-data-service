@@ -35,6 +35,7 @@ fi
 project_kind='dds-project'
 upload_size=`wc -c ${file} | awk '{print $1}'`
 upload_md5=`md5sum ${file} | cut -f1 -d' '`
+#storage_provider_id='ccdbbbd0-aae2-4e6e-838e-91808b4edd5c' # prod s3
 storage_provider_id='a95012e0-e74d-4051-872c-6b8e084e5b84' # uatest s3
 #storage_provider_id='6193c0e3-982b-4216-854c-3174a8505aee' # dev s3
 echo "creating upload"
